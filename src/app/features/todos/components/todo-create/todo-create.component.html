@@ -1,0 +1,75 @@
+<form class="todo-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div class="todo-form__field">
+    <label for="todo-title">Title</label>
+    <input
+      id="todo-title"
+      type="text"
+      formControlName="title"
+      autocomplete="off"
+      placeholder="Prepare Angular exercise"
+    />
+    @if (hasError('title', 'required') || hasError('title', 'blank')) {
+      <p class="todo-form__error">Title is required.</p>
+    } @else if (hasError('title', 'maxlength')) {
+      <p class="todo-form__error">Title must be 120 characters or less.</p>
+    }
+  </div>
+
+  <div class="todo-form__field">
+    <label for="todo-description">Description</label>
+    <textarea
+      id="todo-description"
+      formControlName="description"
+      rows="4"
+      placeholder="Optional details"
+    ></textarea>
+    @if (hasError('description', 'maxlength')) {
+      <p class="todo-form__error">Description must be 500 characters or less.</p>
+    }
+  </div>
+
+  <div class="todo-form__grid">
+    <div class="todo-form__field">
+      <label for="todo-priority">Priority</label>
+      <select id="todo-priority" formControlName="priority">
+        @for (priority of priorities; track priority) {
+          <option [value]="priority">{{ priority }}</option>
+        }
+      </select>
+      @if (hasError('priority', 'required') || hasError('priority', 'invalidPriority')) {
+        <p class="todo-form__error">Choose a valid priority.</p>
+      }
+    </div>
+
+    <div class="todo-form__field">
+      <label for="todo-category">Category</label>
+      <input
+        id="todo-category"
+        type="text"
+        formControlName="category"
+        autocomplete="off"
+        placeholder="Work"
+      />
+      @if (hasError('category', 'maxlength')) {
+        <p class="todo-form__error">Category must be 60 characters or less.</p>
+      }
+    </div>
+  </div>
+
+  <div class="todo-form__grid">
+    <div class="todo-form__field">
+      <label for="todo-due-date">Due date</label>
+      <input id="todo-due-date" type="date" formControlName="dueDate" />
+      @if (hasError('dueDate', 'pastDate')) {
+        <p class="todo-form__error">Due date cannot be in the past.</p>
+      }
+    </div>
+
+    <label class="todo-form__check">
+      <input type="checkbox" formControlName="completed" />
+      <span>Already completed</span>
+    </label>
+  </div>
+
+  <button class="todo-form__submit" type="submit">Add todo</button>
+</form>
