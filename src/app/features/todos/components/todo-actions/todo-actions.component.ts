@@ -1,9 +1,10 @@
 import { Component, input, output } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-todo-actions',
-  imports: [RouterLink],
+  imports: [MatButtonModule, RouterLink],
   templateUrl: './todo-actions.component.html',
   styleUrl: './todo-actions.component.scss',
 })

@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterLink } from '@angular/router';
 
 import { TodoCreateInput, TodoService } from '../../../../core/services/todo.service';
@@ -6,7 +7,7 @@ import { TodoFormComponent } from '../../components/todo-form/todo-form.componen
 
 @Component({
   selector: 'app-todo-new-page',
-  imports: [RouterLink, TodoFormComponent],
+  imports: [MatButtonModule, RouterLink, TodoFormComponent],
   templateUrl: './todo-new-page.component.html',
   styleUrl: './todo-new-page.component.scss',
 })

@@ -1,33 +1,41 @@
 <form class="todo-filters" [formGroup]="form" novalidate>
-  <label class="todo-filters__search" for="todo-search">
-    <span>Search</span>
+  <mat-form-field class="todo-filters__search" appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Search</mat-label>
     <input
+      matInput
       id="todo-search"
       type="search"
       formControlName="search"
       autocomplete="off"
       placeholder="Title or content"
     />
-  </label>
+  </mat-form-field>
 
-  <label class="todo-filters__field" for="todo-priority-filter">
-    <span>Priority</span>
-    <select id="todo-priority-filter" formControlName="priority">
-      <option value="ALL">All priorities</option>
+  <mat-form-field class="todo-filters__field" appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Priority</mat-label>
+    <mat-select id="todo-priority-filter" formControlName="priority">
+      <mat-option value="ALL">All priorities</mat-option>
       @for (priority of priorities; track priority) {
-        <option [value]="priority">{{ priority }}</option>
+        <mat-option [value]="priority">{{ priority }}</mat-option>
       }
-    </select>
-  </label>
+    </mat-select>
+  </mat-form-field>
 
-  <label class="todo-filters__field" for="todo-completion-filter">
-    <span>Status</span>
-    <select id="todo-completion-filter" formControlName="completion">
-      <option value="all">All statuses</option>
-      <option value="active">To do</option>
-      <option value="completed">Completed</option>
-    </select>
-  </label>
+  <div class="todo-filters__status">
+    <span class="todo-filters__label">Status</span>
+    <mat-button-toggle-group
+      id="todo-completion-filter"
+      formControlName="completion"
+      aria-label="Status"
+      [hideSingleSelectionIndicator]="true"
+    >
+      <mat-button-toggle value="all">All</mat-button-toggle>
+      <mat-button-toggle value="active">To do</mat-button-toggle>
+      <mat-button-toggle value="completed">Done</mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
 
-  <button class="todo-filters__reset" type="button" (click)="reset()">Reset</button>
+  <button class="todo-filters__reset" matButton="outlined" type="button" (click)="reset()">
+    Reset
+  </button>
 </form>

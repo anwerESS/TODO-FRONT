@@ -1,7 +1,8 @@
 <form class="todo-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
-  <div class="todo-form__field">
-    <label for="todo-title">Title</label>
+  <mat-form-field class="todo-form__field" appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Title</mat-label>
     <input
+      matInput
       id="todo-title"
       type="text"
       formControlName="title"
@@ -9,41 +10,43 @@
       placeholder="Prepare Angular exercise"
     />
     @if (hasError('title', 'required') || hasError('title', 'blank')) {
-      <p class="todo-form__error">Title is required.</p>
+      <mat-error>Title is required.</mat-error>
     } @else if (hasError('title', 'maxlength')) {
-      <p class="todo-form__error">Title must be 120 characters or less.</p>
+      <mat-error>Title must be 120 characters or less.</mat-error>
     }
-  </div>
+  </mat-form-field>
 
-  <div class="todo-form__field">
-    <label for="todo-description">Content</label>
+  <mat-form-field class="todo-form__field" appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Content</mat-label>
     <textarea
+      matInput
       id="todo-description"
       formControlName="description"
       rows="5"
       placeholder="Optional details"
     ></textarea>
     @if (hasError('description', 'maxlength')) {
-      <p class="todo-form__error">Content must be 500 characters or less.</p>
+      <mat-error>Content must be 500 characters or less.</mat-error>
     }
-  </div>
+  </mat-form-field>
 
   <div class="todo-form__grid">
-    <div class="todo-form__field">
-      <label for="todo-priority">Priority</label>
-      <select id="todo-priority" formControlName="priority">
+    <mat-form-field class="todo-form__field" appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Priority</mat-label>
+      <mat-select id="todo-priority" formControlName="priority">
         @for (priority of priorities; track priority) {
-          <option [value]="priority">{{ priority }}</option>
+          <mat-option [value]="priority">{{ priority }}</mat-option>
         }
-      </select>
+      </mat-select>
       @if (hasError('priority', 'required') || hasError('priority', 'invalidPriority')) {
-        <p class="todo-form__error">Choose a valid priority.</p>
+        <mat-error>Choose a valid priority.</mat-error>
       }
-    </div>
+    </mat-form-field>
 
-    <div class="todo-form__field">
-      <label for="todo-category">Category</label>
+    <mat-form-field class="todo-form__field" appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Category</mat-label>
       <input
+        matInput
         id="todo-category"
         type="text"
         formControlName="category"
@@ -51,25 +54,28 @@
         placeholder="Work"
       />
       @if (hasError('category', 'maxlength')) {
-        <p class="todo-form__error">Category must be 60 characters or less.</p>
+        <mat-error>Category must be 60 characters or less.</mat-error>
       }
-    </div>
+    </mat-form-field>
   </div>
 
   <div class="todo-form__grid">
-    <div class="todo-form__field">
-      <label for="todo-due-date">Due date</label>
-      <input id="todo-due-date" type="date" formControlName="dueDate" />
+    <mat-form-field
+      class="todo-form__field todo-form__date-field"
+      appearance="outline"
+      subscriptSizing="dynamic"
+    >
+      <mat-label>Due date</mat-label>
+      <input matInput id="todo-due-date" type="date" formControlName="dueDate" />
       @if (hasError('dueDate', 'pastDate')) {
-        <p class="todo-form__error">Due date cannot be in the past.</p>
+        <mat-error>Due date cannot be in the past.</mat-error>
       }
-    </div>
+    </mat-form-field>
 
-    <label class="todo-form__check">
-      <input type="checkbox" formControlName="completed" />
-      <span>Completed</span>
-    </label>
+    <mat-checkbox class="todo-form__check" formControlName="completed">Completed</mat-checkbox>
   </div>
 
-  <button class="todo-form__submit" type="submit">{{ submitLabel() }}</button>
+  <button class="todo-form__submit" matButton="filled" type="submit">
+    {{ submitLabel() }}
+  </button>
 </form>

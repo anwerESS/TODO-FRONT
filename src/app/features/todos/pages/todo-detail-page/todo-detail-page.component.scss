@@ -6,13 +6,9 @@
 
 .todo-detail__back {
   justify-self: start;
-  color: #155eef;
+  border-radius: 6px;
+  color: var(--mat-sys-primary);
   font-weight: 800;
-  text-decoration: none;
-}
-
-.todo-detail__back:hover {
-  text-decoration: underline;
 }
 
 .todo-detail__heading {
@@ -24,6 +20,7 @@
 
 .todo-detail__heading h1 {
   margin: 0;
+  color: var(--app-text);
   font-size: 2rem;
   line-height: 1.15;
   overflow-wrap: anywhere;
@@ -32,59 +29,49 @@
 .todo-detail__heading p,
 .todo-detail__missing p {
   margin: 0.35rem 0 0;
-  color: #667085;
+  color: var(--app-muted);
 }
 
 .todo-detail__delete {
-  min-height: 2.5rem;
-  border: 1px solid #f2b8b5;
   border-radius: 6px;
-  padding: 0 0.85rem;
-  background: #fff;
-  color: #b42318;
+  color: var(--app-danger);
   font-weight: 800;
-  cursor: pointer;
 }
 
 .todo-detail__delete:hover {
-  background: #fff3f2;
+  background: var(--app-danger-surface);
 }
 
 .todo-detail__saved {
   margin: 0;
-  border: 1px solid #a6e3bd;
+  border: 1px solid color-mix(in srgb, var(--app-success) 30%, #fff);
   border-radius: 6px;
   padding: 0.65rem 0.75rem;
-  background: #edfdf3;
-  color: #087443;
+  background: var(--app-success-surface);
+  color: var(--app-success);
   font-weight: 800;
 }
 
 .todo-detail__missing {
   display: grid;
   justify-items: start;
-  gap: 0.7rem;
-  padding: 2rem;
-  border: 1px dashed #b8c2d0;
-  border-radius: 8px;
-  background: #fff;
+  border: 1px dashed var(--app-border);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 12px 32px rgba(25, 42, 70, 0.05);
+}
+
+.todo-detail__missing mat-card-content {
+  display: grid;
+  gap: 0.55rem;
+  padding: 1.4rem 1.4rem 0.7rem;
+}
+
+.todo-detail__missing mat-card-actions {
+  padding: 0 1.4rem 1.4rem;
 }
 
 .todo-detail__missing h1 {
   margin: 0;
-}
-
-.todo-detail__missing a {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 2.6rem;
-  border-radius: 6px;
-  padding: 0 0.95rem;
-  background: #155eef;
-  color: #fff;
-  font-weight: 800;
-  text-decoration: none;
 }
 
 @media (max-width: 620px) {

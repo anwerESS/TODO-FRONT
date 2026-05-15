@@ -1,5 +1,5 @@
 <section class="todo-detail">
-  <a class="todo-detail__back" routerLink="/">Back to list</a>
+  <a class="todo-detail__back" matButton="text" routerLink="/">Back to list</a>
 
   @if (todo(); as selectedTodo) {
     <div class="todo-detail__heading">
@@ -8,7 +8,14 @@
         <p>Created {{ selectedTodo.createdAt | date: 'medium' }}</p>
       </div>
 
-      <button class="todo-detail__delete" type="button" (click)="deleteTodo()">Delete</button>
+      <button
+        class="todo-detail__delete"
+        matButton="outlined"
+        type="button"
+        (click)="deleteTodo()"
+      >
+        Delete
+      </button>
     </div>
 
     @if (saved()) {
@@ -21,10 +28,14 @@
       (submitted)="updateTodo($event)"
     />
   } @else {
-    <div class="todo-detail__missing">
-      <h1>Todo not found</h1>
-      <p>The todo does not exist in the current list.</p>
-      <a routerLink="/new">Create todo</a>
-    </div>
+    <mat-card class="todo-detail__missing" appearance="outlined">
+      <mat-card-content>
+        <h1>Todo not found</h1>
+        <p>The todo does not exist in the current list.</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <a matButton="filled" routerLink="/new">Create todo</a>
+      </mat-card-actions>
+    </mat-card>
   }
 </section>

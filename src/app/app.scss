@@ -1,7 +1,13 @@
 .app-shell {
   box-sizing: border-box;
-  min-height: 100vh;
-  max-width: 72rem;
+  min-height: calc(100vh - 4.25rem);
+  max-width: 76rem;
   margin: 0 auto;
   padding: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .app-shell {
+    padding: 1rem;
+  }
 }

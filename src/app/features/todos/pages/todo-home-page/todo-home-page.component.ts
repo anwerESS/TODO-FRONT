@@ -1,4 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { RouterLink } from '@angular/router';
 
 import { TodoService } from '../../../../core/services/todo.service';
@@ -11,7 +13,13 @@ import { TodoListItemComponent } from '../../components/todo-list-item/todo-list
 
 @Component({
   selector: 'app-todo-home-page',
-  imports: [RouterLink, TodoFiltersComponent, TodoListItemComponent],
+  imports: [
+    MatButtonModule,
+    MatCardModule,
+    RouterLink,
+    TodoFiltersComponent,
+    TodoListItemComponent,
+  ],
   templateUrl: './todo-home-page.component.html',
   styleUrl: './todo-home-page.component.scss',
 })

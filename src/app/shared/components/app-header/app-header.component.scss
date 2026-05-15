@@ -6,16 +6,18 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  min-height: 4rem;
+  min-height: 4.25rem;
   padding: 0 1.5rem;
-  border-bottom: 1px solid #d8dee8;
+  border-bottom: 1px solid rgba(216, 225, 236, 0.88);
   background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(12px);
+  box-shadow: 0 10px 32px rgba(25, 42, 70, 0.08);
 }
 
 .app-header__brand {
   font-size: 1.1rem;
   font-weight: 800;
+  letter-spacing: 0;
   text-decoration: none;
 }
 
@@ -27,24 +29,23 @@
 
 .app-header__nav a {
   border-radius: 6px;
-  padding: 0.55rem 0.75rem;
-  color: #4a5568;
+  color: var(--app-muted);
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 800;
   text-decoration: none;
 }
 
 .app-header__nav a:hover,
 .app-header__nav a.is-active {
-  background: #e9eef6;
-  color: #16181d;
+  background: var(--app-surface-muted);
+  color: var(--app-text);
 }
 
 @media (max-width: 520px) {
   .app-header {
     align-items: flex-start;
     flex-direction: column;
-    padding: 0.85rem 1rem;
+    padding: 0.8rem 1rem;
   }
 
   .app-header__nav {

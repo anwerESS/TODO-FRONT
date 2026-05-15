@@ -1,10 +1,11 @@
 .todo-form {
   display: grid;
   gap: 1rem;
-  padding: 1rem;
-  border: 1px solid #d8dee8;
-  border-radius: 8px;
-  background: #fff;
+  padding: 1.25rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: var(--app-shadow);
 }
 
 .todo-form__grid {
@@ -14,73 +15,35 @@
 }
 
 .todo-form__field {
-  display: grid;
-  gap: 0.4rem;
-}
-
-.todo-form__field label,
-.todo-form__check {
-  color: #344054;
-  font-size: 0.9rem;
-  font-weight: 800;
-}
-
-.todo-form__field input,
-.todo-form__field select,
-.todo-form__field textarea {
   width: 100%;
-  border: 1px solid #cfd7e3;
-  border-radius: 6px;
-  padding: 0.7rem 0.75rem;
-  background: #fff;
-  color: #16181d;
 }
 
-.todo-form__field input:focus,
-.todo-form__field select:focus,
-.todo-form__field textarea:focus {
-  border-color: #155eef;
-  outline: 3px solid rgba(21, 94, 239, 0.16);
+.todo-form__date-field {
+  --mat-form-field-container-height: 56px;
+  --mat-form-field-container-vertical-padding: 16px;
 }
 
-.todo-form__field textarea {
+.todo-form__date-field input[type='date'] {
+  min-height: 1.75rem;
+  line-height: 1.75rem;
+}
+
+.todo-form textarea {
   resize: vertical;
 }
 
 .todo-form__check {
   align-self: end;
-  display: flex;
   min-height: 2.8rem;
-  align-items: center;
-  gap: 0.55rem;
-}
-
-.todo-form__check input {
-  width: 1rem;
-  height: 1rem;
-  accent-color: #147d64;
-}
-
-.todo-form__error {
-  margin: 0;
-  color: #b42318;
-  font-size: 0.85rem;
+  padding-bottom: 0.25rem;
+  color: var(--app-text);
+  font-weight: 700;
 }
 
 .todo-form__submit {
   justify-self: start;
-  min-height: 2.65rem;
-  border: 0;
   border-radius: 6px;
-  padding: 0 1rem;
-  background: #155eef;
-  color: #fff;
   font-weight: 800;
-  cursor: pointer;
-}
-
-.todo-form__submit:hover {
-  background: #004eeb;
 }
 
 @media (max-width: 640px) {

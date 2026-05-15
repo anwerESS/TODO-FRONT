@@ -1,6 +1,8 @@
 import { DatePipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { map } from 'rxjs';
 
@@ -9,7 +11,7 @@ import { TodoFormComponent } from '../../components/todo-form/todo-form.componen
 
 @Component({
   selector: 'app-todo-detail-page',
-  imports: [DatePipe, RouterLink, TodoFormComponent],
+  imports: [DatePipe, MatButtonModule, MatCardModule, RouterLink, TodoFormComponent],
   templateUrl: './todo-detail-page.component.html',
   styleUrl: './todo-detail-page.component.scss',
 })

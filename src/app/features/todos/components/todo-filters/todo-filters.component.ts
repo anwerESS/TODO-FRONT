@@ -1,6 +1,11 @@
 import { Component, inject, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatButtonModule } from '@angular/material/button';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 
 import { TodoPriority } from '../../../../core/models/todo-priority.enum';
 
@@ -21,7 +26,14 @@ export const DEFAULT_TODO_FILTERS: TodoFilters = {
 
 @Component({
   selector: 'app-todo-filters',
-  imports: [ReactiveFormsModule],
+  imports: [
+    MatButtonModule,
+    MatButtonToggleModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    ReactiveFormsModule,
+  ],
   templateUrl: './todo-filters.component.html',
   styleUrl: './todo-filters.component.scss',
 })

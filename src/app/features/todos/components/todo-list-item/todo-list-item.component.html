@@ -1,13 +1,11 @@
-<article class="todo-item" [class.todo-item--done]="todo().completed">
-  <div class="todo-item__main">
-    <label class="todo-item__check">
-      <input
-        type="checkbox"
-        [checked]="todo().completed"
-        [attr.aria-label]="'Toggle ' + todo().title"
-        (change)="toggleCompleted.emit(todo().id)"
-      />
-    </label>
+<mat-card class="todo-item" [class.todo-item--done]="todo().completed" appearance="outlined">
+  <mat-card-content class="todo-item__main">
+    <mat-checkbox
+      class="todo-item__check"
+      [checked]="todo().completed"
+      [attr.aria-label]="'Toggle ' + todo().title"
+      (change)="toggleCompleted.emit(todo().id)"
+    />
 
     <div class="todo-item__content">
       <a class="todo-item__title" [routerLink]="['/', todo().id]">{{ todo().title }}</a>
@@ -16,26 +14,28 @@
         <p class="todo-item__description">{{ todo().description }}</p>
       }
 
-      <div class="todo-item__meta">
-        <span
+      <mat-chip-set class="todo-item__meta" aria-label="Todo metadata">
+        <mat-chip
           class="todo-item__priority"
           [class.todo-item__priority--low]="todo().priority === TodoPriority.LOW"
           [class.todo-item__priority--medium]="todo().priority === TodoPriority.MEDIUM"
           [class.todo-item__priority--high]="todo().priority === TodoPriority.HIGH"
         >
           {{ todo().priority }}
-        </span>
+        </mat-chip>
 
         @if (todo().category) {
-          <span>{{ todo().category }}</span>
+          <mat-chip>{{ todo().category }}</mat-chip>
         }
 
         @if (todo().dueDate) {
-          <span>Due {{ todo().dueDate | date: 'mediumDate' }}</span>
+          <mat-chip>Due {{ todo().dueDate | date: 'mediumDate' }}</mat-chip>
         }
-      </div>
+      </mat-chip-set>
     </div>
-  </div>
+  </mat-card-content>
 
-  <app-todo-actions [todoId]="todo().id" (remove)="remove.emit(todo().id)" />
-</article>
+  <mat-card-actions class="todo-item__actions" align="end">
+    <app-todo-actions [todoId]="todo().id" (remove)="remove.emit(todo().id)" />
+  </mat-card-actions>
+</mat-card>

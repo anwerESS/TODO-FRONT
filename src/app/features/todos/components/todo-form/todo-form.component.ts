@@ -7,6 +7,11 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 
 import { TodoPriority } from '../../../../core/models/todo-priority.enum';
 import { Todo } from '../../../../core/models/todo.model';
@@ -40,7 +45,14 @@ const priorityValue: ValidatorFn = (
 
 @Component({
   selector: 'app-todo-form',
-  imports: [ReactiveFormsModule],
+  imports: [
+    MatButtonModule,
+    MatCheckboxModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    ReactiveFormsModule,
+  ],
   templateUrl: './todo-form.component.html',
   styleUrl: './todo-form.component.scss',
 })
