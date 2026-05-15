@@ -3,6 +3,8 @@ import { computed, Injectable, signal } from '@angular/core';
 import { Todo } from '../models/todo.model';
 import { TodoPriority } from '../models/todo-priority.enum';
 
+export const TODO_STORAGE_KEY = 'todo-front.todos.v1';
+
 /** Fields supplied when creating a todo; server-generated fields are omitted. */
 export type TodoCreateInput = Pick<Todo, 'title' | 'priority'> &
   Partial<Pick<Todo, 'description' | 'category' | 'dueDate' | 'completed'>>;
@@ -12,13 +14,26 @@ export type TodoUpdateInput = Partial<
   Omit<Todo, 'id' | 'createdAt' | 'updatedAt'>
 >;
 
+type StoredTodo = Omit<Todo, 'createdAt' | 'updatedAt' | 'dueDate'> & {
+  createdAt: string;
+  updatedAt: string;
+  dueDate?: string;
+};
+
 @Injectable({ providedIn: 'root' })
 export class TodoService {
   private readonly _todos = signal<Todo[]>([]);
   private nextId = 1;
 
   constructor() {
-    this.seedInitialTodos();
+    const storedTodos = this.readStoredTodos();
+    if (storedTodos) {
+      this.hydrateTodos(storedTodos);
+      return;
+    }
+
+    // this.seedInitialTodos();
+    // this.persistTodos();
   }
 
   /** Read-only list for templates and other consumers. */
@@ -55,34 +70,35 @@ export class TodoService {
       category: input.category?.trim() || undefined,
       dueDate: input.dueDate,
     };
-    this._todos.update((list) => [...list, todo]);
+    this._todos.set([...this._todos(), todo]);
+    this.persistTodos();
     this.logCrud('CREATE', todo);
     return todo;
   }
 
   update(id: number, patch: TodoUpdateInput): Todo | undefined {
     let updated: Todo | undefined;
-    this._todos.update((list) =>
-      list.map((t) => {
-        if (t.id !== id) {
-          return t;
-        }
-        const now = new Date();
-        updated = {
-          ...t,
-          ...patch,
-          title: patch.title !== undefined ? patch.title.trim() : t.title,
-          description:
-            patch.description !== undefined
-              ? patch.description.trim() || undefined
-              : t.description,
-          category:
-            patch.category !== undefined ? patch.category.trim() || undefined : t.category,
-          updatedAt: now,
-        };
-        return updated;
-      }),
-    );
+    const nextTodos = this._todos().map((t) => {
+      if (t.id !== id) {
+        return t;
+      }
+      const now = new Date();
+      updated = {
+        ...t,
+        ...patch,
+        title: patch.title !== undefined ? patch.title.trim() : t.title,
+        description:
+          patch.description !== undefined ? patch.description.trim() || undefined : t.description,
+        category: patch.category !== undefined ? patch.category.trim() || undefined : t.category,
+        updatedAt: now,
+      };
+      return updated;
+    });
+
+    if (updated) {
+      this._todos.set(nextTodos);
+      this.persistTodos();
+    }
 
     this.logCrud('UPDATE', { id, patch, todo: updated });
     return updated;
@@ -90,8 +106,12 @@ export class TodoService {
 
   remove(id: number): boolean {
     const before = this._todos().length;
-    this._todos.update((list) => list.filter((t) => t.id !== id));
-    const removed = this._todos().length < before;
+    const nextTodos = this._todos().filter((t) => t.id !== id);
+    const removed = nextTodos.length < before;
+    if (removed) {
+      this._todos.set(nextTodos);
+      this.persistTodos();
+    }
     this.logCrud('DELETE', { id, removed });
     return removed;
   }
@@ -110,7 +130,10 @@ export class TodoService {
 
   removeCompleted(): number {
     const completed = this._todos().filter((t) => t.completed);
-    this._todos.update((list) => list.filter((t) => !t.completed));
+    if (completed.length > 0) {
+      this._todos.set(this._todos().filter((t) => !t.completed));
+      this.persistTodos();
+    }
     this.logCrud('DELETE_COMPLETED', { removedCount: completed.length, removedTodos: completed });
     return completed.length;
   }
@@ -118,21 +141,23 @@ export class TodoService {
   clear(): void {
     this._todos.set([]);
     this.nextId = 1;
+    this.persistTodos();
   }
 
-  /** Replace all todos (e.g. after loading from API); recomputes next id. */
+  /** Replace all todos (e.g. after loading from API/localStorage); recomputes next id. */
   replaceAll(todos: Todo[]): void {
-    this._todos.set([...todos]);
-    this.nextId = todos.length ? Math.max(...todos.map((t) => t.id)) + 1 : 1;
+    this.hydrateTodos(todos);
+    this.persistTodos();
     this.logCrud('REPLACE_ALL', { todos });
   }
 
-  /** Seed in-memory store for demos/tests. */
+  /** Seed localStorage-backed store for demos/tests. */
   seedSample(): void {
     if (this._todos().length > 0) {
       return;
     }
     this.seedInitialTodos();
+    this.persistTodos();
   }
 
   private seedInitialTodos(): void {
@@ -198,6 +223,71 @@ export class TodoService {
     ];
 
     this._todos.set(initialTodos);
+  }
+
+  private hydrateTodos(todos: Todo[]): void {
+    this._todos.set([...todos]);
+    this.nextId = todos.length ? Math.max(...todos.map((t) => t.id)) + 1 : 1;
+  }
+
+  private readStoredTodos(): Todo[] | null {
+    const storage = this.getStorage();
+    if (!storage) {
+      return null;
+    }
+
+    const rawTodos = storage.getItem(TODO_STORAGE_KEY);
+    if (rawTodos === null) {
+      return null;
+    }
+
+    try {
+      const parsed = JSON.parse(rawTodos) as StoredTodo[];
+      if (!Array.isArray(parsed)) {
+        return [];
+      }
+      return parsed.map((todo) => this.deserializeTodo(todo));
+    } catch {
+      return null;
+    }
+  }
+
+  private persistTodos(): void {
+    const storage = this.getStorage();
+    if (!storage) {
+      return;
+    }
+
+    storage.setItem(
+      TODO_STORAGE_KEY,
+      JSON.stringify(this._todos().map((todo) => this.serializeTodo(todo))),
+    );
+  }
+
+  private serializeTodo(todo: Todo): StoredTodo {
+    return {
+      ...todo,
+      createdAt: todo.createdAt.toISOString(),
+      updatedAt: todo.updatedAt.toISOString(),
+      dueDate: todo.dueDate?.toISOString(),
+    };
+  }
+
+  private deserializeTodo(todo: StoredTodo): Todo {
+    return {
+      ...todo,
+      createdAt: new Date(todo.createdAt),
+      updatedAt: new Date(todo.updatedAt),
+      dueDate: todo.dueDate ? new Date(todo.dueDate) : undefined,
+    };
+  }
+
+  private getStorage(): Storage | null {
+    try {
+      return typeof localStorage === 'undefined' ? null : localStorage;
+    } catch {
+      return null;
+    }
   }
 
   private addDays(date: Date, days: number): Date {

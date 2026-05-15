@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { Todo } from '../models/todo.model';
 import { TodoPriority } from '../models/todo-priority.enum';
-import { TodoCreateInput, TodoService } from './todo.service';
+import { TODO_STORAGE_KEY, TodoCreateInput, TodoService } from './todo.service';
 
 /** Fixed instant for deterministic `createdAt` / `updatedAt` assertions. */
 const FIXED_NOW = new Date('2025-06-01T10:30:00.000Z');
@@ -27,14 +27,43 @@ function sampleTodo(overrides: Partial<Todo> & Pick<Todo, 'id'>): Todo {
   return { ...base, ...overrides };
 }
 
+function createLocalStorageMock(): Storage {
+  let store: Record<string, string> = {};
+
+  return {
+    get length(): number {
+      return Object.keys(store).length;
+    },
+    clear(): void {
+      store = {};
+    },
+    getItem(key: string): string | null {
+      return Object.prototype.hasOwnProperty.call(store, key) ? store[key] : null;
+    },
+    key(index: number): string | null {
+      return Object.keys(store)[index] ?? null;
+    },
+    removeItem(key: string): void {
+      delete store[key];
+    },
+    setItem(key: string, value: string): void {
+      store[key] = value;
+    },
+  };
+}
+
 describe('TodoService', () => {
   let service: TodoService;
   let consoleLogSpy: jasmine.Spy;
+  let localStorageMock: Storage;
 
   beforeEach(async () => {
     jasmine.clock().install();
     jasmine.clock().mockDate(FIXED_NOW);
     consoleLogSpy = spyOn(console, 'log');
+    localStorageMock = createLocalStorageMock();
+    spyOnProperty(window, 'localStorage', 'get').and.returnValue(localStorageMock);
+    localStorageMock.clear();
 
     await TestBed.configureTestingModule({}).compileComponents();
     service = TestBed.inject(TodoService);
@@ -43,15 +72,24 @@ describe('TodoService', () => {
   });
 
   afterEach(() => {
+    localStorageMock.clear();
     jasmine.clock().uninstall();
   });
 
   describe('initial state', () => {
-    it('seeds five initial todos when the service starts', () => {
-      const seededService = new TodoService();
+    it('starts empty when there are no stored todos', () => {
+      localStorageMock.removeItem(TODO_STORAGE_KEY);
+      const emptyService = new TodoService();
 
-      expect(seededService.todos().length).toBe(5);
-      expect(seededService.add(minimalCreate()).id).toBe(6);
+      expect(emptyService.todos().length).toBe(0);
+      expect(emptyService.add(minimalCreate()).id).toBe(1);
+    });
+
+    it('can seed five sample todos explicitly', () => {
+      service.seedSample();
+
+      expect(service.todos().length).toBe(5);
+      expect(service.add(minimalCreate()).id).toBe(6);
     });
 
     it('exposes an empty list and zero counts', () => {
@@ -59,6 +97,67 @@ describe('TodoService', () => {
       expect(service.count()).toBe(0);
       expect(service.activeCount()).toBe(0);
       expect(service.completedCount()).toBe(0);
+    });
+  });
+
+  describe('localStorage persistence', () => {
+    it('loads todos from localStorage and restores date fields', () => {
+      localStorage.setItem(
+        TODO_STORAGE_KEY,
+        JSON.stringify([
+          {
+            id: 12,
+            title: 'Stored todo',
+            description: 'Persisted description',
+            completed: false,
+            createdAt: '2025-05-01T08:00:00.000Z',
+            updatedAt: '2025-05-02T09:00:00.000Z',
+            priority: TodoPriority.HIGH,
+            category: 'Storage',
+            dueDate: '2025-05-10T00:00:00.000Z',
+          },
+        ]),
+      );
+
+      const storedService = new TodoService();
+      const loaded = storedService.getById(12);
+
+      expect(loaded?.title).toBe('Stored todo');
+      expect(loaded?.createdAt).toEqual(new Date('2025-05-01T08:00:00.000Z'));
+      expect(loaded?.updatedAt).toEqual(new Date('2025-05-02T09:00:00.000Z'));
+      expect(loaded?.dueDate).toEqual(new Date('2025-05-10T00:00:00.000Z'));
+      expect(storedService.add(minimalCreate()).id).toBe(13);
+    });
+
+    it('persists created todos to localStorage', () => {
+      service.add(
+        minimalCreate({
+          title: 'Persist me',
+          dueDate: new Date('2025-12-24T00:00:00.000Z'),
+        }),
+      );
+
+      const stored = JSON.parse(localStorage.getItem(TODO_STORAGE_KEY) ?? '[]') as Array<{
+        title: string;
+        dueDate?: string;
+      }>;
+
+      expect(stored).toEqual([
+        jasmine.objectContaining({
+          title: 'Persist me',
+          dueDate: '2025-12-24T00:00:00.000Z',
+        }),
+      ]);
+    });
+
+    it('persists updates and removals to localStorage', () => {
+      const created = service.add(minimalCreate({ title: 'Before' }));
+
+      service.update(created.id, { title: 'After' });
+      expect(localStorage.getItem(TODO_STORAGE_KEY)).toContain('"title":"After"');
+
+      service.remove(created.id);
+      expect(localStorage.getItem(TODO_STORAGE_KEY)).toBe('[]');
     });
   });
 
