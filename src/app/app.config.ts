@@ -1,12 +1,16 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
-import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    // Ajoute les écouteurs globaux d’erreurs du navigateur pour remonter les erreurs non capturées Angular.
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes), provideClientHydration(withEventReplay())
-  ]
+    // Configure le routeur Angular avec la liste des routes de l’application.
+    provideRouter(routes),
+    // Active l’hydratation côté client après le rendu serveur, avec rejeu des événements utilisateur capturés avant la fin de l’hydratation.
+    provideClientHydration(withEventReplay()),
+  ],
 };

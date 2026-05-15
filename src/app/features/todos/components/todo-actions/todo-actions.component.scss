@@ -1,0 +1,49 @@
+.todo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.todo-actions__button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.25rem;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 0 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.todo-actions__button--primary {
+  background: #155eef;
+  color: #fff;
+}
+
+.todo-actions__button--primary:hover {
+  background: #004eeb;
+}
+
+.todo-actions__button--danger {
+  border-color: #f2b8b5;
+  background: #fff;
+  color: #b42318;
+}
+
+.todo-actions__button--danger:hover {
+  background: #fff3f2;
+}
+
+@media (max-width: 620px) {
+  .todo-actions {
+    justify-content: stretch;
+  }
+
+  .todo-actions__button {
+    flex: 1;
+  }
+}

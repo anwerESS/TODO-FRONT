@@ -17,6 +17,10 @@ export class TodoService {
   private readonly _todos = signal<Todo[]>([]);
   private nextId = 1;
 
+  constructor() {
+    this.seedInitialTodos();
+  }
+
   /** Read-only list for templates and other consumers. */
   readonly todos = this._todos.asReadonly();
 
@@ -27,11 +31,15 @@ export class TodoService {
   readonly completedCount = computed(() => this._todos().filter((t) => t.completed).length);
 
   getAll(): Todo[] {
-    return [...this._todos()];
+    const todos = [...this._todos()];
+    this.logCrud('READ_ALL', {});
+    return todos;
   }
 
   getById(id: number): Todo | undefined {
-    return this._todos().find((t) => t.id === id);
+    const todo = this._todos().find((t) => t.id === id);
+    this.logCrud('READ_ONE', { id, todo });
+    return todo;
   }
 
   add(input: TodoCreateInput): Todo {
@@ -48,6 +56,7 @@ export class TodoService {
       dueDate: input.dueDate,
     };
     this._todos.update((list) => [...list, todo]);
+    this.logCrud('CREATE', todo);
     return todo;
   }
 
@@ -74,13 +83,17 @@ export class TodoService {
         return updated;
       }),
     );
+
+    this.logCrud('UPDATE', { id, patch, todo: updated });
     return updated;
   }
 
   remove(id: number): boolean {
     const before = this._todos().length;
     this._todos.update((list) => list.filter((t) => t.id !== id));
-    return this._todos().length < before;
+    const removed = this._todos().length < before;
+    this.logCrud('DELETE', { id, removed });
+    return removed;
   }
 
   toggleCompleted(id: number): Todo | undefined {
@@ -98,6 +111,7 @@ export class TodoService {
   removeCompleted(): number {
     const completed = this._todos().filter((t) => t.completed);
     this._todos.update((list) => list.filter((t) => !t.completed));
+    this.logCrud('DELETE_COMPLETED', { removedCount: completed.length, removedTodos: completed });
     return completed.length;
   }
 
@@ -110,6 +124,7 @@ export class TodoService {
   replaceAll(todos: Todo[]): void {
     this._todos.set([...todos]);
     this.nextId = todos.length ? Math.max(...todos.map((t) => t.id)) + 1 : 1;
+    this.logCrud('REPLACE_ALL', { todos });
   }
 
   /** Seed in-memory store for demos/tests. */
@@ -117,15 +132,85 @@ export class TodoService {
     if (this._todos().length > 0) {
       return;
     }
-    this.add({
-      title: 'Learn Angular signals',
-      description: 'Use TodoService.todos() in templates.',
-      priority: TodoPriority.HIGH,
-    });
-    this.add({
-      title: 'Wire list UI',
-      priority: TodoPriority.MEDIUM,
-      completed: true,
+    this.seedInitialTodos();
+  }
+
+  private seedInitialTodos(): void {
+    if (this._todos().length > 0) {
+      return;
+    }
+
+    const now = new Date();
+    const initialTodos: Todo[] = [
+      {
+        id: this.nextId++,
+        title: 'Review Angular routing',
+        description: 'Confirm home, detail, and creation routes are easy to navigate.',
+        completed: false,
+        createdAt: now,
+        updatedAt: now,
+        priority: TodoPriority.HIGH,
+        category: 'Angular',
+        dueDate: this.addDays(now, 1),
+      },
+      {
+        id: this.nextId++,
+        title: 'Add search and filters',
+        description: 'Search by title and content, then filter by priority and completion.',
+        completed: true,
+        createdAt: now,
+        updatedAt: now,
+        priority: TodoPriority.MEDIUM,
+        category: 'UI',
+      },
+      {
+        id: this.nextId++,
+        title: 'Prepare service integration',
+        description: 'Keep the TodoService API ready for a future backend connection.',
+        completed: false,
+        createdAt: now,
+        updatedAt: now,
+        priority: TodoPriority.MEDIUM,
+        category: 'Architecture',
+        dueDate: this.addDays(now, 3),
+      },
+      {
+        id: this.nextId++,
+        title: 'Polish responsive layout',
+        description: 'Check the list and forms on mobile and desktop widths.',
+        completed: false,
+        createdAt: now,
+        updatedAt: now,
+        priority: TodoPriority.LOW,
+        category: 'Design',
+      },
+      {
+        id: this.nextId++,
+        title: 'Validate CRUD logs',
+        description: 'Create, edit, and delete a todo while checking the browser console.',
+        completed: false,
+        createdAt: now,
+        updatedAt: now,
+        priority: TodoPriority.HIGH,
+        category: 'Debug',
+        dueDate: this.addDays(now, 2),
+      },
+    ];
+
+    this._todos.set(initialTodos);
+  }
+
+  private addDays(date: Date, days: number): Date {
+    const nextDate = new Date(date);
+    nextDate.setDate(nextDate.getDate() + days);
+    return nextDate;
+  }
+
+  private logCrud(operation: string, payload: unknown): void {
+    console.log('[TodoService]', {
+      operation,
+      payload,
+      todos: this._todos().map((todo) => ({ ...todo })),
     });
   }
 }

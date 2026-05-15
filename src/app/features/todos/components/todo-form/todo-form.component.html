@@ -16,15 +16,15 @@
   </div>
 
   <div class="todo-form__field">
-    <label for="todo-description">Description</label>
+    <label for="todo-description">Content</label>
     <textarea
       id="todo-description"
       formControlName="description"
-      rows="4"
+      rows="5"
       placeholder="Optional details"
     ></textarea>
     @if (hasError('description', 'maxlength')) {
-      <p class="todo-form__error">Description must be 500 characters or less.</p>
+      <p class="todo-form__error">Content must be 500 characters or less.</p>
     }
   </div>
 
@@ -67,9 +67,9 @@
 
     <label class="todo-form__check">
       <input type="checkbox" formControlName="completed" />
-      <span>Already completed</span>
+      <span>Completed</span>
     </label>
   </div>
 
-  <button class="todo-form__submit" type="submit">Add todo</button>
+  <button class="todo-form__submit" type="submit">{{ submitLabel() }}</button>
 </form>

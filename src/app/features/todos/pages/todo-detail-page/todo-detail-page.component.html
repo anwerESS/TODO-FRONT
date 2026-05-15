@@ -1,0 +1,30 @@
+<section class="todo-detail">
+  <a class="todo-detail__back" routerLink="/">Back to list</a>
+
+  @if (todo(); as selectedTodo) {
+    <div class="todo-detail__heading">
+      <div>
+        <h1>{{ selectedTodo.title }}</h1>
+        <p>Created {{ selectedTodo.createdAt | date: 'medium' }}</p>
+      </div>
+
+      <button class="todo-detail__delete" type="button" (click)="deleteTodo()">Delete</button>
+    </div>
+
+    @if (saved()) {
+      <p class="todo-detail__saved">Todo updated.</p>
+    }
+
+    <app-todo-form
+      [todo]="selectedTodo"
+      submitLabel="Save changes"
+      (submitted)="updateTodo($event)"
+    />
+  } @else {
+    <div class="todo-detail__missing">
+      <h1>Todo not found</h1>
+      <p>The todo does not exist in the current list.</p>
+      <a routerLink="/new">Create todo</a>
+    </div>
+  }
+</section>

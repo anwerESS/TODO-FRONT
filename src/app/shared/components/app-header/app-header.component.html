@@ -1,0 +1,10 @@
+<header class="app-header">
+  <a class="app-header__brand" routerLink="/">Todo App</a>
+
+  <nav class="app-header__nav" aria-label="Main navigation">
+    <a routerLink="/" routerLinkActive="is-active" [routerLinkActiveOptions]="{ exact: true }">
+      Todos
+    </a>
+    <a routerLink="/new" routerLinkActive="is-active">New todo</a>
+  </nav>
+</header>

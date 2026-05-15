@@ -1,0 +1,27 @@
+.todo-new {
+  display: grid;
+  gap: 1rem;
+  max-width: 46rem;
+}
+
+.todo-new__heading {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.todo-new__heading a {
+  justify-self: start;
+  color: #155eef;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.todo-new__heading a:hover {
+  text-decoration: underline;
+}
+
+.todo-new__heading h1 {
+  margin: 0;
+  font-size: 2rem;
+  line-height: 1.15;
+}

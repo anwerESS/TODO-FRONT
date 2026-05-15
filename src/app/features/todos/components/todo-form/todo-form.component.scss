@@ -1,9 +1,10 @@
 .todo-form {
   display: grid;
   gap: 1rem;
-  padding: 1.25rem;
-  border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+  padding: 1rem;
+  border: 1px solid #d8dee8;
   border-radius: 8px;
+  background: #fff;
 }
 
 .todo-form__grid {
@@ -19,21 +20,27 @@
 
 .todo-form__field label,
 .todo-form__check {
+  color: #344054;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 800;
 }
 
 .todo-form__field input,
 .todo-form__field select,
 .todo-form__field textarea {
   width: 100%;
-  box-sizing: border-box;
-  border: 1px solid color-mix(in srgb, CanvasText 22%, transparent);
+  border: 1px solid #cfd7e3;
   border-radius: 6px;
   padding: 0.7rem 0.75rem;
-  font: inherit;
-  background: Canvas;
-  color: CanvasText;
+  background: #fff;
+  color: #16181d;
+}
+
+.todo-form__field input:focus,
+.todo-form__field select:focus,
+.todo-form__field textarea:focus {
+  border-color: #155eef;
+  outline: 3px solid rgba(21, 94, 239, 0.16);
 }
 
 .todo-form__field textarea {
@@ -51,23 +58,24 @@
 .todo-form__check input {
   width: 1rem;
   height: 1rem;
+  accent-color: #147d64;
 }
 
 .todo-form__error {
   margin: 0;
-  font-size: 0.85rem;
   color: #b42318;
+  font-size: 0.85rem;
 }
 
 .todo-form__submit {
   justify-self: start;
+  min-height: 2.65rem;
   border: 0;
   border-radius: 6px;
-  padding: 0.75rem 1rem;
-  font: inherit;
-  font-weight: 700;
+  padding: 0 1rem;
   background: #155eef;
   color: #fff;
+  font-weight: 800;
   cursor: pointer;
 }
 
@@ -76,10 +84,6 @@
 }
 
 @media (max-width: 640px) {
-  .todo-form {
-    padding: 1rem;
-  }
-
   .todo-form__grid {
     grid-template-columns: 1fr;
   }

@@ -1,26 +1,7 @@
-.shell {
+.app-shell {
   box-sizing: border-box;
   min-height: 100vh;
-  max-width: 42rem;
+  max-width: 72rem;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
-}
-
-.shell__header h1 {
-  margin: 0 0 0.75rem;
-  font-size: 1.75rem;
-  font-weight: 600;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-}
-
-.shell__tagline {
-  margin: 0 0 2rem;
-  font-size: 1rem;
-  line-height: 1.5;
-  color: color-mix(in srgb, CanvasText 72%, transparent);
-}
-
-.shell__main {
-  min-height: 4rem;
+  padding: 1.5rem;
 }

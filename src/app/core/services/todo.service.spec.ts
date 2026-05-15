@@ -29,14 +29,17 @@ function sampleTodo(overrides: Partial<Todo> & Pick<Todo, 'id'>): Todo {
 
 describe('TodoService', () => {
   let service: TodoService;
+  let consoleLogSpy: jasmine.Spy;
 
   beforeEach(async () => {
     jasmine.clock().install();
     jasmine.clock().mockDate(FIXED_NOW);
+    consoleLogSpy = spyOn(console, 'log');
 
     await TestBed.configureTestingModule({}).compileComponents();
     service = TestBed.inject(TodoService);
     service.clear();
+    consoleLogSpy.calls.reset();
   });
 
   afterEach(() => {
@@ -44,6 +47,13 @@ describe('TodoService', () => {
   });
 
   describe('initial state', () => {
+    it('seeds five initial todos when the service starts', () => {
+      const seededService = new TodoService();
+
+      expect(seededService.todos().length).toBe(5);
+      expect(seededService.add(minimalCreate()).id).toBe(6);
+    });
+
     it('exposes an empty list and zero counts', () => {
       expect(service.todos()).toEqual([]);
       expect(service.count()).toBe(0);
@@ -62,6 +72,19 @@ describe('TodoService', () => {
       expect(second.id).toBe(2);
       expect(service.todos().length).toBe(2);
       expect(service.count()).toBe(2);
+    });
+
+    it('logs the create operation with payload and the updated list', () => {
+      const todo = service.add(minimalCreate({ title: 'Logged create' }));
+
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        '[TodoService]',
+        jasmine.objectContaining({
+          operation: 'CREATE',
+          payload: todo,
+          todos: [jasmine.objectContaining({ title: 'Logged create' })],
+        }),
+      );
     });
 
     it('sets description to undefined when omitted, empty, or whitespace-only', () => {
@@ -117,6 +140,25 @@ describe('TodoService', () => {
     it('returns undefined when id is missing', () => {
       expect(service.getById(999)).toBeUndefined();
     });
+
+    it('logs the read-one operation with payload and the current list', () => {
+      const created = service.add(minimalCreate({ title: 'Find me' }));
+      consoleLogSpy.calls.reset();
+
+      service.getById(created.id);
+
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        '[TodoService]',
+        jasmine.objectContaining({
+          operation: 'READ_ONE',
+          payload: jasmine.objectContaining({
+            id: created.id,
+            todo: jasmine.objectContaining({ title: 'Find me' }),
+          }),
+          todos: [jasmine.objectContaining({ title: 'Find me' })],
+        }),
+      );
+    });
   });
 
   describe('getAll', () => {
@@ -128,6 +170,26 @@ describe('TodoService', () => {
 
       expect(todos).toEqual([first, second]);
       expect(todos).not.toBe(service.todos());
+    });
+
+    it('logs the read-all operation with payload and the current list', () => {
+      service.add(minimalCreate({ title: 'First' }));
+      service.add(minimalCreate({ title: 'Second' }));
+      consoleLogSpy.calls.reset();
+
+      service.getAll();
+
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        '[TodoService]',
+        jasmine.objectContaining({
+          operation: 'READ_ALL',
+          payload: {},
+          todos: [
+            jasmine.objectContaining({ title: 'First' }),
+            jasmine.objectContaining({ title: 'Second' }),
+          ],
+        }),
+      );
     });
   });
 
@@ -161,6 +223,26 @@ describe('TodoService', () => {
     it('returns undefined when id does not exist', () => {
       expect(service.update(42, { title: 'Nope' })).toBeUndefined();
     });
+
+    it('logs the update operation with payload and the updated list', () => {
+      const created = service.add(minimalCreate({ title: 'Before update' }));
+      consoleLogSpy.calls.reset();
+
+      service.update(created.id, { title: 'After update' });
+
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        '[TodoService]',
+        jasmine.objectContaining({
+          operation: 'UPDATE',
+          payload: jasmine.objectContaining({
+            id: created.id,
+            patch: jasmine.objectContaining({ title: 'After update' }),
+            todo: jasmine.objectContaining({ title: 'After update' }),
+          }),
+          todos: [jasmine.objectContaining({ title: 'After update' })],
+        }),
+      );
+    });
   });
 
   describe('remove', () => {
@@ -172,6 +254,22 @@ describe('TodoService', () => {
 
     it('returns false when id is unknown', () => {
       expect(service.remove(1)).toBe(false);
+    });
+
+    it('logs the delete operation with payload and the updated list', () => {
+      const { id } = service.add(minimalCreate({ title: 'Remove me' }));
+      consoleLogSpy.calls.reset();
+
+      service.remove(id);
+
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        '[TodoService]',
+        jasmine.objectContaining({
+          operation: 'DELETE',
+          payload: { id, removed: true },
+          todos: [],
+        }),
+      );
     });
   });
 
@@ -245,7 +343,7 @@ describe('TodoService', () => {
   describe('seedSample', () => {
     it('adds sample todos only when the store is empty', () => {
       service.seedSample();
-      expect(service.todos().length).toBe(2);
+      expect(service.todos().length).toBe(5);
 
       const beforeTitles = service.todos().map((t) => t.title);
       service.seedSample();

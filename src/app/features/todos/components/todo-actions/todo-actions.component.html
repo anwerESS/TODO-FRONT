@@ -1,0 +1,8 @@
+<div class="todo-actions">
+  <a class="todo-actions__button todo-actions__button--primary" [routerLink]="['/', todoId()]">
+    View / edit
+  </a>
+  <button class="todo-actions__button todo-actions__button--danger" type="button" (click)="remove.emit()">
+    Delete
+  </button>
+</div>

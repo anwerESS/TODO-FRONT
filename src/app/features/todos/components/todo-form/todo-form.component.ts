@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, effect, inject, input, output } from '@angular/core';
 import {
   AbstractControl,
   FormBuilder,
@@ -9,7 +9,8 @@ import {
 } from '@angular/forms';
 
 import { TodoPriority } from '../../../../core/models/todo-priority.enum';
-import { TodoCreateInput, TodoService } from '../../../../core/services/todo.service';
+import { Todo } from '../../../../core/models/todo.model';
+import { TodoCreateInput } from '../../../../core/services/todo.service';
 
 const nonBlank: ValidatorFn = (control: AbstractControl<string | null>): ValidationErrors | null => {
   const value = control.value;
@@ -38,14 +39,17 @@ const priorityValue: ValidatorFn = (
     : { invalidPriority: true };
 
 @Component({
-  selector: 'app-todo-create',
+  selector: 'app-todo-form',
   imports: [ReactiveFormsModule],
-  templateUrl: './todo-create.component.html',
-  styleUrl: './todo-create.component.scss',
+  templateUrl: './todo-form.component.html',
+  styleUrl: './todo-form.component.scss',
 })
-export class TodoCreateComponent {
+export class TodoFormComponent {
   private readonly formBuilder = inject(FormBuilder);
-  private readonly todoService = inject(TodoService);
+
+  readonly todo = input<Todo | null>(null);
+  readonly submitLabel = input('Save todo');
+  readonly submitted = output<TodoCreateInput>();
 
   readonly priorities = Object.values(TodoPriority);
 
@@ -58,6 +62,10 @@ export class TodoCreateComponent {
     completed: [false],
   });
 
+  private readonly syncFormWithTodo = effect(() => {
+    this.setFormValue(this.todo());
+  });
+
   submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -65,30 +73,43 @@ export class TodoCreateComponent {
     }
 
     const value = this.form.getRawValue();
-    const input: TodoCreateInput = {
+    this.submitted.emit({
       title: value.title,
       description: value.description || undefined,
       priority: value.priority,
       category: value.category || undefined,
       dueDate: value.dueDate ? new Date(`${value.dueDate}T00:00:00`) : undefined,
       completed: value.completed,
-    };
-
-    this.todoService.add(input);
-    console.log(this.todoService.getAll());
-
-    this.form.reset({
-      title: '',
-      description: '',
-      priority: TodoPriority.MEDIUM,
-      category: '',
-      dueDate: '',
-      completed: false,
     });
   }
 
   hasError(controlName: keyof typeof this.form.controls, error: string): boolean {
     const control = this.form.controls[controlName];
     return control.hasError(error) && (control.dirty || control.touched);
+  }
+
+  private setFormValue(todo: Todo | null): void {
+    this.form.reset(
+      {
+        title: todo?.title ?? '',
+        description: todo?.description ?? '',
+        priority: todo?.priority ?? TodoPriority.MEDIUM,
+        category: todo?.category ?? '',
+        dueDate: this.toDateInputValue(todo?.dueDate),
+        completed: todo?.completed ?? false,
+      },
+      { emitEvent: false },
+    );
+  }
+
+  private toDateInputValue(date?: Date): string {
+    if (!date) {
+      return '';
+    }
+
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 }

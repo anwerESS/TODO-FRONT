@@ -1,12 +1,12 @@
 import { Component } from '@angular/core';
-import { TodoCreateComponent } from './features/todos/components/todo-create/todo-create.component';
+import { RouterOutlet } from '@angular/router';
+
+import { AppHeaderComponent } from './shared/components/app-header/app-header.component';
 
 @Component({
   selector: 'app-root',
-  imports: [TodoCreateComponent],
+  imports: [AppHeaderComponent, RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
-export class App {
-  readonly pageTitle = 'Todo App';
-}
+export class App {}

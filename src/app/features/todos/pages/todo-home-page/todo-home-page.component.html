@@ -1,0 +1,32 @@
+<section class="todo-home">
+  <div class="todo-home__heading">
+    <div>
+      <h1>Todos</h1>
+      <p>{{ activeCount() }} active, {{ completedCount() }} completed, {{ totalCount() }} total</p>
+    </div>
+
+    <a class="todo-home__new" routerLink="/new">New todo</a>
+  </div>
+
+  <app-todo-filters (filtersChange)="updateFilters($event)" />
+
+  @if (filteredTodos().length > 0) {
+    <ul class="todo-home__list" aria-label="Todo list">
+      @for (todo of filteredTodos(); track todo.id) {
+        <li>
+          <app-todo-list-item
+            [todo]="todo"
+            (remove)="deleteTodo($event)"
+            (toggleCompleted)="toggleCompleted($event)"
+          />
+        </li>
+      }
+    </ul>
+  } @else {
+    <div class="todo-home__empty">
+      <h2>No todos found</h2>
+      <p>Create a todo or adjust the filters.</p>
+      <a routerLink="/new">Create todo</a>
+    </div>
+  }
+</section>

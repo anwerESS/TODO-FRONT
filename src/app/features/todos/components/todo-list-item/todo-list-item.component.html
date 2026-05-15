@@ -1,0 +1,41 @@
+<article class="todo-item" [class.todo-item--done]="todo().completed">
+  <div class="todo-item__main">
+    <label class="todo-item__check">
+      <input
+        type="checkbox"
+        [checked]="todo().completed"
+        [attr.aria-label]="'Toggle ' + todo().title"
+        (change)="toggleCompleted.emit(todo().id)"
+      />
+    </label>
+
+    <div class="todo-item__content">
+      <a class="todo-item__title" [routerLink]="['/', todo().id]">{{ todo().title }}</a>
+
+      @if (todo().description) {
+        <p class="todo-item__description">{{ todo().description }}</p>
+      }
+
+      <div class="todo-item__meta">
+        <span
+          class="todo-item__priority"
+          [class.todo-item__priority--low]="todo().priority === TodoPriority.LOW"
+          [class.todo-item__priority--medium]="todo().priority === TodoPriority.MEDIUM"
+          [class.todo-item__priority--high]="todo().priority === TodoPriority.HIGH"
+        >
+          {{ todo().priority }}
+        </span>
+
+        @if (todo().category) {
+          <span>{{ todo().category }}</span>
+        }
+
+        @if (todo().dueDate) {
+          <span>Due {{ todo().dueDate | date: 'mediumDate' }}</span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <app-todo-actions [todoId]="todo().id" (remove)="remove.emit(todo().id)" />
+</article>
