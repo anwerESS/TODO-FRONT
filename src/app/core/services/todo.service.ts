@@ -1,299 +1,225 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { computed, inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
+import { catchError, EMPTY, map, Observable, tap, throwError } from 'rxjs';
 
-import { Todo } from '../models/todo.model';
 import { TodoPriority } from '../models/todo-priority.enum';
+import { Todo } from '../models/todo.model';
 
-export const TODO_STORAGE_KEY = 'todo-front.todos.v1';
+export const TODO_API_URL = 'http://localhost:8080/api/todos';
 
 /** Fields supplied when creating a todo; server-generated fields are omitted. */
 export type TodoCreateInput = Pick<Todo, 'title' | 'priority'> &
   Partial<Pick<Todo, 'description' | 'category' | 'dueDate' | 'completed'>>;
 
-/** Partial update; `id` and timestamps are managed by the service. */
-export type TodoUpdateInput = Partial<
-  Omit<Todo, 'id' | 'createdAt' | 'updatedAt'>
->;
+/** Partial update; `id` and timestamps are managed by the API. */
+export type TodoUpdateInput = Partial<Omit<Todo, 'id' | 'createdAt' | 'updatedAt'>>;
 
-type StoredTodo = Omit<Todo, 'createdAt' | 'updatedAt' | 'dueDate'> & {
+type TodoApiDto = {
+  id: number;
+  title: string;
+  description?: string | null;
+  completed: boolean;
   createdAt: string;
   updatedAt: string;
-  dueDate?: string;
+  priority: TodoPriority;
+  category?: string | null;
+  dueDate?: string | null;
+};
+
+type TodoApiPayload = {
+  title?: string;
+  description?: string | null;
+  completed?: boolean;
+  priority?: TodoPriority;
+  category?: string | null;
+  dueDate?: string | null;
+};
+
+type DeleteResponse = {
+  removed: boolean;
 };
 
 @Injectable({ providedIn: 'root' })
 export class TodoService {
+  private readonly http = inject(HttpClient);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly _todos = signal<Todo[]>([]);
-  private nextId = 1;
-
-  constructor() {
-    const storedTodos = this.readStoredTodos();
-    if (storedTodos) {
-      this.hydrateTodos(storedTodos);
-      return;
-    }
-
-    // this.seedInitialTodos();
-    // this.persistTodos();
-  }
+  private readonly _loading = signal(false);
+  private readonly _error = signal<string | null>(null);
 
   /** Read-only list for templates and other consumers. */
   readonly todos = this._todos.asReadonly();
+  readonly loading = this._loading.asReadonly();
+  readonly error = this._error.asReadonly();
 
   readonly count = computed(() => this._todos().length);
 
-  readonly activeCount = computed(() => this._todos().filter((t) => !t.completed).length);
+  readonly activeCount = computed(() => this._todos().filter((todo) => !todo.completed).length);
 
-  readonly completedCount = computed(() => this._todos().filter((t) => t.completed).length);
+  readonly completedCount = computed(() => this._todos().filter((todo) => todo.completed).length);
 
-  getAll(): Todo[] {
-    const todos = [...this._todos()];
-    this.logCrud('READ_ALL', {});
-    return todos;
-  }
-
-  getById(id: number): Todo | undefined {
-    const todo = this._todos().find((t) => t.id === id);
-    this.logCrud('READ_ONE', { id, todo });
-    return todo;
-  }
-
-  add(input: TodoCreateInput): Todo {
-    const now = new Date();
-    const todo: Todo = {
-      id: this.nextId++,
-      title: input.title.trim(),
-      description: input.description?.trim() || undefined,
-      completed: input.completed ?? false,
-      createdAt: now,
-      updatedAt: now,
-      priority: input.priority,
-      category: input.category?.trim() || undefined,
-      dueDate: input.dueDate,
-    };
-    this._todos.set([...this._todos(), todo]);
-    this.persistTodos();
-    this.logCrud('CREATE', todo);
-    return todo;
-  }
-
-  update(id: number, patch: TodoUpdateInput): Todo | undefined {
-    let updated: Todo | undefined;
-    const nextTodos = this._todos().map((t) => {
-      if (t.id !== id) {
-        return t;
-      }
-      const now = new Date();
-      updated = {
-        ...t,
-        ...patch,
-        title: patch.title !== undefined ? patch.title.trim() : t.title,
-        description:
-          patch.description !== undefined ? patch.description.trim() || undefined : t.description,
-        category: patch.category !== undefined ? patch.category.trim() || undefined : t.category,
-        updatedAt: now,
-      };
-      return updated;
-    });
-
-    if (updated) {
-      this._todos.set(nextTodos);
-      this.persistTodos();
+  loadTodos(): Observable<Todo[]> {
+    if (!this.isBrowser) {
+      return EMPTY;
     }
 
-    this.logCrud('UPDATE', { id, patch, todo: updated });
-    return updated;
-  }
+    this._loading.set(true);
+    this._error.set(null);
 
-  remove(id: number): boolean {
-    const before = this._todos().length;
-    const nextTodos = this._todos().filter((t) => t.id !== id);
-    const removed = nextTodos.length < before;
-    if (removed) {
-      this._todos.set(nextTodos);
-      this.persistTodos();
-    }
-    this.logCrud('DELETE', { id, removed });
-    return removed;
-  }
-
-  toggleCompleted(id: number): Todo | undefined {
-    const current = this.getById(id);
-    if (!current) {
-      return undefined;
-    }
-    return this.update(id, { completed: !current.completed });
-  }
-
-  setCompleted(id: number, completed: boolean): Todo | undefined {
-    return this.update(id, { completed });
-  }
-
-  removeCompleted(): number {
-    const completed = this._todos().filter((t) => t.completed);
-    if (completed.length > 0) {
-      this._todos.set(this._todos().filter((t) => !t.completed));
-      this.persistTodos();
-    }
-    this.logCrud('DELETE_COMPLETED', { removedCount: completed.length, removedTodos: completed });
-    return completed.length;
-  }
-
-  clear(): void {
-    this._todos.set([]);
-    this.nextId = 1;
-    this.persistTodos();
-  }
-
-  /** Replace all todos (e.g. after loading from API/localStorage); recomputes next id. */
-  replaceAll(todos: Todo[]): void {
-    this.hydrateTodos(todos);
-    this.persistTodos();
-    this.logCrud('REPLACE_ALL', { todos });
-  }
-
-  /** Seed localStorage-backed store for demos/tests. */
-  seedSample(): void {
-    if (this._todos().length > 0) {
-      return;
-    }
-    this.seedInitialTodos();
-    this.persistTodos();
-  }
-
-  private seedInitialTodos(): void {
-    if (this._todos().length > 0) {
-      return;
-    }
-
-    const now = new Date();
-    const initialTodos: Todo[] = [
-      {
-        id: this.nextId++,
-        title: 'Review Angular routing',
-        description: 'Confirm home, detail, and creation routes are easy to navigate.',
-        completed: false,
-        createdAt: now,
-        updatedAt: now,
-        priority: TodoPriority.HIGH,
-        category: 'Angular',
-        dueDate: this.addDays(now, 1),
-      },
-      {
-        id: this.nextId++,
-        title: 'Add search and filters',
-        description: 'Search by title and content, then filter by priority and completion.',
-        completed: true,
-        createdAt: now,
-        updatedAt: now,
-        priority: TodoPriority.MEDIUM,
-        category: 'UI',
-      },
-      {
-        id: this.nextId++,
-        title: 'Prepare service integration',
-        description: 'Keep the TodoService API ready for a future backend connection.',
-        completed: false,
-        createdAt: now,
-        updatedAt: now,
-        priority: TodoPriority.MEDIUM,
-        category: 'Architecture',
-        dueDate: this.addDays(now, 3),
-      },
-      {
-        id: this.nextId++,
-        title: 'Polish responsive layout',
-        description: 'Check the list and forms on mobile and desktop widths.',
-        completed: false,
-        createdAt: now,
-        updatedAt: now,
-        priority: TodoPriority.LOW,
-        category: 'Design',
-      },
-      {
-        id: this.nextId++,
-        title: 'Validate CRUD logs',
-        description: 'Create, edit, and delete a todo while checking the browser console.',
-        completed: false,
-        createdAt: now,
-        updatedAt: now,
-        priority: TodoPriority.HIGH,
-        category: 'Debug',
-        dueDate: this.addDays(now, 2),
-      },
-    ];
-
-    this._todos.set(initialTodos);
-  }
-
-  private hydrateTodos(todos: Todo[]): void {
-    this._todos.set([...todos]);
-    this.nextId = todos.length ? Math.max(...todos.map((t) => t.id)) + 1 : 1;
-  }
-
-  private readStoredTodos(): Todo[] | null {
-    const storage = this.getStorage();
-    if (!storage) {
-      return null;
-    }
-
-    const rawTodos = storage.getItem(TODO_STORAGE_KEY);
-    if (rawTodos === null) {
-      return null;
-    }
-
-    try {
-      const parsed = JSON.parse(rawTodos) as StoredTodo[];
-      if (!Array.isArray(parsed)) {
-        return [];
-      }
-      return parsed.map((todo) => this.deserializeTodo(todo));
-    } catch {
-      return null;
-    }
-  }
-
-  private persistTodos(): void {
-    const storage = this.getStorage();
-    if (!storage) {
-      return;
-    }
-
-    storage.setItem(
-      TODO_STORAGE_KEY,
-      JSON.stringify(this._todos().map((todo) => this.serializeTodo(todo))),
+    return this.http.get<TodoApiDto[]>(TODO_API_URL).pipe(
+      map((todos) => todos.map((todo) => this.fromApi(todo))),
+      tap((todos) => {
+        this._todos.set(todos);
+        this._loading.set(false);
+        this.logCrud('READ_ALL', {});
+      }),
+      catchError((error: unknown) => this.handleError<Todo[]>('READ_ALL', error)),
     );
   }
 
-  private serializeTodo(todo: Todo): StoredTodo {
-    return {
-      ...todo,
-      createdAt: todo.createdAt.toISOString(),
-      updatedAt: todo.updatedAt.toISOString(),
-      dueDate: todo.dueDate?.toISOString(),
-    };
+  loadTodo(id: number): Observable<Todo> {
+    if (!this.isBrowser) {
+      return EMPTY;
+    }
+
+    this._loading.set(true);
+    this._error.set(null);
+
+    return this.http.get<TodoApiDto>(`${TODO_API_URL}/${id}`).pipe(
+      map((todo) => this.fromApi(todo)),
+      tap((todo) => {
+        this.upsertTodo(todo);
+        this._loading.set(false);
+        this.logCrud('READ_ONE', { id, todo });
+      }),
+      catchError((error: unknown) => this.handleError<Todo>('READ_ONE', error)),
+    );
   }
 
-  private deserializeTodo(todo: StoredTodo): Todo {
+  getById(id: number): Todo | undefined {
+    const todo = this._todos().find((item) => item.id === id);
+    this.logCrud('READ_ONE_CACHE', { id, todo });
+    return todo;
+  }
+
+  add(input: TodoCreateInput): Observable<Todo> {
+    const payload = this.toApiPayload(input);
+    this._error.set(null);
+
+    return this.http.post<TodoApiDto>(TODO_API_URL, payload).pipe(
+      map((todo) => this.fromApi(todo)),
+      tap((todo) => {
+        this.upsertTodo(todo);
+        this.logCrud('CREATE', todo);
+      }),
+      catchError((error: unknown) => this.handleError<Todo>('CREATE', error)),
+    );
+  }
+
+  update(id: number, patch: TodoUpdateInput): Observable<Todo> {
+    const payload = this.toApiPayload(patch);
+    this._error.set(null);
+
+    return this.http.patch<TodoApiDto>(`${TODO_API_URL}/${id}`, payload).pipe(
+      map((todo) => this.fromApi(todo)),
+      tap((todo) => {
+        this.upsertTodo(todo);
+        this.logCrud('UPDATE', { id, patch, todo });
+      }),
+      catchError((error: unknown) => this.handleError<Todo>('UPDATE', error)),
+    );
+  }
+
+  remove(id: number): Observable<boolean> {
+    this._error.set(null);
+
+    return this.http.delete<DeleteResponse>(`${TODO_API_URL}/${id}`).pipe(
+      map((response) => response.removed),
+      tap((removed) => {
+        if (removed) {
+          this._todos.update((todos) => todos.filter((todo) => todo.id !== id));
+        }
+        this.logCrud('DELETE', { id, removed });
+      }),
+      catchError((error: unknown) => this.handleError<boolean>('DELETE', error)),
+    );
+  }
+
+  toggleCompleted(id: number): Observable<Todo> {
+    const current = this.getById(id);
+    if (!current) {
+      return throwError(() => new Error(`Todo ${id} is not loaded.`));
+    }
+
+    return this.update(id, { completed: !current.completed });
+  }
+
+  replaceAll(todos: Todo[]): void {
+    this._todos.set([...todos]);
+    this.logCrud('REPLACE_CACHE', { todos });
+  }
+
+  private upsertTodo(todo: Todo): void {
+    this._todos.update((todos) => {
+      const index = todos.findIndex((item) => item.id === todo.id);
+      if (index === -1) {
+        return [...todos, todo];
+      }
+
+      return todos.map((item) => (item.id === todo.id ? todo : item));
+    });
+  }
+
+  private fromApi(todo: TodoApiDto): Todo {
     return {
-      ...todo,
+      id: todo.id,
+      title: todo.title,
+      description: todo.description ?? undefined,
+      completed: todo.completed,
       createdAt: new Date(todo.createdAt),
       updatedAt: new Date(todo.updatedAt),
+      priority: todo.priority,
+      category: todo.category ?? undefined,
       dueDate: todo.dueDate ? new Date(todo.dueDate) : undefined,
     };
   }
 
-  private getStorage(): Storage | null {
-    try {
-      return typeof localStorage === 'undefined' ? null : localStorage;
-    } catch {
-      return null;
+  private toApiPayload(input: TodoCreateInput | TodoUpdateInput): TodoApiPayload {
+    const payload: TodoApiPayload = {};
+
+    if ('title' in input) {
+      payload.title = input.title?.trim();
     }
+
+    if ('description' in input) {
+      payload.description = input.description?.trim() || null;
+    }
+
+    if ('completed' in input) {
+      payload.completed = input.completed;
+    }
+
+    if ('priority' in input) {
+      payload.priority = input.priority;
+    }
+
+    if ('category' in input) {
+      payload.category = input.category?.trim() || null;
+    }
+
+    if ('dueDate' in input) {
+      payload.dueDate = input.dueDate ? input.dueDate.toISOString() : null;
+    }
+
+    return payload;
   }
 
-  private addDays(date: Date, days: number): Date {
-    const nextDate = new Date(date);
-    nextDate.setDate(nextDate.getDate() + days);
-    return nextDate;
+  private handleError<T>(operation: string, error: unknown): Observable<T> {
+    this._loading.set(false);
+    this._error.set('Unable to reach the todo API.');
+    this.logCrud(`${operation}_ERROR`, error);
+    return throwError(() => error);
   }
 
   private logCrud(operation: string, payload: unknown): void {

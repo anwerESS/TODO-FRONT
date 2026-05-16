@@ -14,7 +14,24 @@
 
   <app-todo-filters (filtersChange)="updateFilters($event)" />
 
-  @if (filteredTodos().length > 0) {
+  @if (error()) {
+    <mat-card class="todo-home__state todo-home__state--error" appearance="outlined">
+      <mat-card-content>
+        <h2>API unavailable</h2>
+        <p>{{ error() }}</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button matButton="filled" type="button" (click)="reloadTodos()">Retry</button>
+      </mat-card-actions>
+    </mat-card>
+  } @else if (loading()) {
+    <mat-card class="todo-home__state" appearance="outlined">
+      <mat-card-content>
+        <h2>Loading todos</h2>
+        <p>Fetching the latest list from the API.</p>
+      </mat-card-content>
+    </mat-card>
+  } @else if (filteredTodos().length > 0) {
     <ul class="todo-home__list" aria-label="Todo list">
       @for (todo of filteredTodos(); track todo.id) {
         <li>
@@ -27,7 +44,7 @@
       }
     </ul>
   } @else {
-    <mat-card class="todo-home__empty" appearance="outlined">
+    <mat-card class="todo-home__state todo-home__empty" appearance="outlined">
       <mat-card-content>
         <h2>No todos found</h2>
         <p>Create a todo or adjust the filters.</p>

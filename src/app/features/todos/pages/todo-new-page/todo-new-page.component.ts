@@ -1,4 +1,5 @@
-import { Component, inject } from '@angular/core';
+import { Component, DestroyRef, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { Router, RouterLink } from '@angular/router';
 
@@ -14,9 +15,17 @@ import { TodoFormComponent } from '../../components/todo-form/todo-form.componen
 export class TodoNewPageComponent {
   private readonly router = inject(Router);
   private readonly todoService = inject(TodoService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  readonly error = this.todoService.error;
 
   createTodo(input: TodoCreateInput): void {
-    const todo = this.todoService.add(input);
-    void this.router.navigate(['/', todo.id]);
+    this.todoService
+      .add(input)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (todo) => void this.router.navigate(['/', todo.id]),
+        error: () => undefined,
+      });
   }
 }

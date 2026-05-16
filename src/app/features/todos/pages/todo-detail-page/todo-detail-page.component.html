@@ -1,7 +1,14 @@
 <section class="todo-detail">
   <a class="todo-detail__back" matButton="text" routerLink="/">Back to list</a>
 
-  @if (todo(); as selectedTodo) {
+  @if (error()) {
+    <mat-card class="todo-detail__state todo-detail__state--error" appearance="outlined">
+      <mat-card-content>
+        <h1>API unavailable</h1>
+        <p>{{ error() }}</p>
+      </mat-card-content>
+    </mat-card>
+  } @else if (todo(); as selectedTodo) {
     <div class="todo-detail__heading">
       <div>
         <h1>{{ selectedTodo.title }}</h1>
@@ -27,8 +34,15 @@
       submitLabel="Save changes"
       (submitted)="updateTodo($event)"
     />
+  } @else if (loading()) {
+    <mat-card class="todo-detail__state" appearance="outlined">
+      <mat-card-content>
+        <h1>Loading todo</h1>
+        <p>Fetching the latest details from the API.</p>
+      </mat-card-content>
+    </mat-card>
   } @else {
-    <mat-card class="todo-detail__missing" appearance="outlined">
+    <mat-card class="todo-detail__state todo-detail__missing" appearance="outlined">
       <mat-card-content>
         <h1>Todo not found</h1>
         <p>The todo does not exist in the current list.</p>

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of } from 'rxjs';
 
@@ -13,17 +14,19 @@ describe('TodoNewPageComponent', () => {
   let router: jasmine.SpyObj<Router>;
 
   beforeEach(async () => {
-    todoService = jasmine.createSpyObj<TodoService>('TodoService', ['add']);
+    todoService = jasmine.createSpyObj<TodoService>('TodoService', ['add'], {
+      error: signal<string | null>(null).asReadonly(),
+    });
     router = jasmine.createSpyObj<Router>('Router', ['navigate']);
 
-    todoService.add.and.returnValue({
+    todoService.add.and.returnValue(of({
       id: 42,
       title: 'Created todo',
       completed: false,
       createdAt: new Date('2025-06-01T10:30:00.000Z'),
       updatedAt: new Date('2025-06-01T10:30:00.000Z'),
       priority: TodoPriority.MEDIUM,
-    });
+    }));
     router.navigate.and.resolveTo(true);
 
     await TestBed.configureTestingModule({

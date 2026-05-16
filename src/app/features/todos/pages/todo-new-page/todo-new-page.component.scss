@@ -22,3 +22,13 @@
   font-size: 2rem;
   line-height: 1.15;
 }
+
+.todo-new__error {
+  margin: 0;
+  border: 1px solid color-mix(in srgb, var(--app-danger) 44%, var(--app-border));
+  border-radius: 6px;
+  padding: 0.65rem 0.75rem;
+  background: var(--app-danger-surface);
+  color: var(--app-danger);
+  font-weight: 800;
+}

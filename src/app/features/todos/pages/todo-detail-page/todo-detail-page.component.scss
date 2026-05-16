@@ -52,7 +52,7 @@
   font-weight: 800;
 }
 
-.todo-detail__missing {
+.todo-detail__state {
   display: grid;
   justify-items: start;
   border: 1px dashed var(--app-border);
@@ -60,18 +60,27 @@
   box-shadow: var(--app-soft-shadow);
 }
 
-.todo-detail__missing mat-card-content {
+.todo-detail__state mat-card-content {
   display: grid;
   gap: 0.55rem;
   padding: 1.4rem 1.4rem 0.7rem;
 }
 
-.todo-detail__missing mat-card-actions {
+.todo-detail__state mat-card-actions {
   padding: 0 1.4rem 1.4rem;
 }
 
-.todo-detail__missing h1 {
+.todo-detail__state h1 {
   margin: 0;
+}
+
+.todo-detail__state--error {
+  border-color: color-mix(in srgb, var(--app-danger) 44%, var(--app-border));
+  background: var(--app-danger-surface);
+}
+
+.todo-detail__state--error h1 {
+  color: var(--app-danger);
 }
 
 @media (max-width: 620px) {

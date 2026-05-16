@@ -1,4 +1,5 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { RouterLink } from '@angular/router';
@@ -25,8 +26,11 @@ import { TodoListItemComponent } from '../../components/todo-list-item/todo-list
 })
 export class TodoHomePageComponent {
   private readonly todoService = inject(TodoService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly filters = signal<TodoFilters>(DEFAULT_TODO_FILTERS);
+  readonly loading = this.todoService.loading;
+  readonly error = this.todoService.error;
   readonly totalCount = this.todoService.count;
   readonly activeCount = this.todoService.activeCount;
   readonly completedCount = this.todoService.completedCount;
@@ -50,15 +54,32 @@ export class TodoHomePageComponent {
     });
   });
 
+  constructor() {
+    this.reloadTodos();
+  }
+
+  reloadTodos(): void {
+    this.todoService
+      .loadTodos()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ error: () => undefined });
+  }
+
   updateFilters(filters: TodoFilters): void {
     this.filters.set(filters);
   }
 
   deleteTodo(id: number): void {
-    this.todoService.remove(id);
+    this.todoService
+      .remove(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ error: () => undefined });
   }
 
   toggleCompleted(id: number): void {
-    this.todoService.toggleCompleted(id);
+    this.todoService
+      .toggleCompleted(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({ error: () => undefined });
   }
 }

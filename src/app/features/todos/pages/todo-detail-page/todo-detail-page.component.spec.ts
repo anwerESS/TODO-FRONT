@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { ActivatedRoute, convertToParamMap, Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 import { TodoPriority } from '../../../../core/models/todo-priority.enum';
 import { Todo } from '../../../../core/models/todo.model';
@@ -25,10 +26,20 @@ describe('TodoDetailPageComponent', () => {
 
   beforeEach(async () => {
     paramMap$ = new BehaviorSubject(convertToParamMap({ id: '3' }));
-    todoService = jasmine.createSpyObj<TodoService>('TodoService', ['getById', 'update', 'remove']);
+    todoService = jasmine.createSpyObj<TodoService>(
+      'TodoService',
+      ['loadTodo', 'getById', 'update', 'remove'],
+      {
+        loading: signal(false).asReadonly(),
+        error: signal<string | null>(null).asReadonly(),
+      },
+    );
     router = jasmine.createSpyObj<Router>('Router', ['navigate']);
 
+    todoService.loadTodo.and.returnValue(of(EXISTING_TODO));
     todoService.getById.and.callFake((id: number) => (id === 3 ? EXISTING_TODO : undefined));
+    todoService.update.and.returnValue(of(EXISTING_TODO));
+    todoService.remove.and.returnValue(of(true));
     router.navigate.and.resolveTo(true);
 
     await TestBed.configureTestingModule({
@@ -46,6 +57,7 @@ describe('TodoDetailPageComponent', () => {
 
   it('loads the todo from the current route id', () => {
     expect(component.todo()).toBe(EXISTING_TODO);
+    expect(todoService.loadTodo).toHaveBeenCalledWith(3);
     expect(todoService.getById).toHaveBeenCalledWith(3);
   });
 

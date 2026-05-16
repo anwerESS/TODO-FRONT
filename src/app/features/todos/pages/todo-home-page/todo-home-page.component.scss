@@ -49,7 +49,7 @@
   list-style: none;
 }
 
-.todo-home__empty {
+.todo-home__state {
   display: grid;
   justify-items: start;
   border: 1px dashed var(--app-border);
@@ -57,23 +57,32 @@
   box-shadow: var(--app-soft-shadow);
 }
 
-.todo-home__empty mat-card-content {
+.todo-home__state mat-card-content {
   display: grid;
   gap: 0.55rem;
   padding: 1.4rem 1.4rem 0.7rem;
 }
 
-.todo-home__empty mat-card-actions {
+.todo-home__state mat-card-actions {
   padding: 0 1.4rem 1.4rem;
 }
 
-.todo-home__empty h2,
-.todo-home__empty p {
+.todo-home__state h2,
+.todo-home__state p {
   margin: 0;
 }
 
-.todo-home__empty p {
+.todo-home__state p {
   color: var(--app-muted);
+}
+
+.todo-home__state--error {
+  border-color: color-mix(in srgb, var(--app-danger) 44%, var(--app-border));
+  background: var(--app-danger-surface);
+}
+
+.todo-home__state--error h2 {
+  color: var(--app-danger);
 }
 
 @media (max-width: 620px) {
