@@ -1,20 +1,30 @@
 <mat-toolbar class="app-header">
   <a class="app-header__brand" matButton="text" routerLink="/">Todo App</a>
 
-  <nav class="app-header__nav" aria-label="Main navigation">
-    <a
-      matButton="text"
-      routerLink="/"
-      routerLinkActive="is-active"
-      [routerLinkActiveOptions]="{ exact: true }"
-    >
-      Todos
-    </a>
-    <a matButton="text" routerLink="/new" routerLinkActive="is-active">New todo</a>
-  </nav>
+  @if (isAuthenticated()) {
+    <nav class="app-header__nav" aria-label="Main navigation">
+      <a
+        matButton="text"
+        routerLink="/"
+        routerLinkActive="is-active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        Todos
+      </a>
+      <a matButton="text" routerLink="/new" routerLinkActive="is-active">New todo</a>
+    </nav>
+
+    <div class="app-header__session">
+      <span class="app-header__user">{{ username() }}</span>
+      <button matButton="outlined" type="button" [disabled]="loggingOut()" (click)="logout()">
+        Logout
+      </button>
+    </div>
+  }
 
   <mat-slide-toggle
     class="app-header__theme-toggle"
+    [class.app-header__theme-toggle--alone]="!isAuthenticated()"
     [checked]="theme.isDark()"
     (change)="theme.setDark($event.checked)"
   >

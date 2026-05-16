@@ -1,0 +1,63 @@
+.login-page {
+  display: grid;
+  min-height: calc(100vh - 7.25rem);
+  place-items: center;
+  padding: 1rem 0;
+}
+
+.login-page__panel {
+  width: min(100%, 28rem);
+  border: 1px solid var(--app-border);
+  background: var(--app-panel-strong-background);
+  box-shadow: var(--app-shadow);
+}
+
+.login-page__panel mat-card-header {
+  padding: 1.5rem 1.5rem 0.75rem;
+}
+
+.login-page__panel mat-card-title {
+  color: var(--app-text);
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.login-page__panel mat-card-subtitle {
+  color: var(--app-muted);
+  font-weight: 600;
+}
+
+.login-page__panel mat-card-content {
+  padding: 0.75rem 1.5rem 1.5rem;
+}
+
+.login-page__form {
+  display: grid;
+  gap: 1rem;
+}
+
+.login-page__error {
+  border: 1px solid color-mix(in srgb, var(--app-danger) 42%, var(--app-border));
+  border-radius: 6px;
+  margin: 0 0 1rem;
+  padding: 0.75rem 0.85rem;
+  background: var(--app-danger-surface);
+  color: var(--app-danger);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.login-page__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  border-radius: 6px;
+  font-weight: 800;
+}
+
+.login-page__submit mat-progress-spinner {
+  --mdc-circular-progress-active-indicator-color: currentColor;
+}

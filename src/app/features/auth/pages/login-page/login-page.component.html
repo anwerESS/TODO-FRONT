@@ -1,0 +1,51 @@
+<section class="login-page">
+  <mat-card class="login-page__panel" appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Sign in</mat-card-title>
+      <mat-card-subtitle>Access your todo workspace</mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (error()) {
+        <p class="login-page__error" role="alert">{{ error() }}</p>
+      }
+
+      <form class="login-page__form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Username</mat-label>
+          <input
+            matInput
+            id="login-username"
+            type="text"
+            formControlName="username"
+            autocomplete="username"
+          />
+          @if (hasError('username', 'required') || hasError('username', 'blank')) {
+            <mat-error>Username is required.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            id="login-password"
+            type="password"
+            formControlName="password"
+            autocomplete="current-password"
+          />
+          @if (hasError('password', 'required') || hasError('password', 'blank')) {
+            <mat-error>Password is required.</mat-error>
+          }
+        </mat-form-field>
+
+        <button class="login-page__submit" matButton="filled" type="submit" [disabled]="loading()">
+          @if (loading()) {
+            <mat-progress-spinner diameter="18" mode="indeterminate" />
+          }
+          <span>Log in</span>
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</section>

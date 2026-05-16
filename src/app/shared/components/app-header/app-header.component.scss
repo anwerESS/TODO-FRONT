@@ -42,10 +42,36 @@
   color: var(--app-text);
 }
 
+.app-header__session {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.app-header__user {
+  overflow: hidden;
+  max-width: 10rem;
+  color: var(--app-muted);
+  font-size: 0.9rem;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.app-header__session button {
+  flex: 0 0 auto;
+  border-radius: 6px;
+  font-weight: 800;
+}
+
 .app-header__theme-toggle {
   flex: 0 0 auto;
   color: var(--app-muted);
   font-weight: 800;
+}
+
+.app-header__theme-toggle--alone {
+  margin-left: auto;
 }
 
 @media (max-width: 520px) {
@@ -65,7 +91,20 @@
     text-align: center;
   }
 
+  .app-header__session {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .app-header__user {
+    max-width: 12rem;
+  }
+
   .app-header__theme-toggle {
     align-self: flex-end;
+  }
+
+  .app-header__theme-toggle--alone {
+    margin-left: 0;
   }
 }

@@ -1,12 +1,13 @@
 import { isPlatformBrowser } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { computed, inject, Injectable, PLATFORM_ID, signal } from '@angular/core';
 import { catchError, EMPTY, map, Observable, tap, throwError } from 'rxjs';
 
+import { TODO_API_URL } from '../config/api.config';
 import { TodoPriority } from '../models/todo-priority.enum';
 import { Todo } from '../models/todo.model';
 
-export const TODO_API_URL = 'http://localhost:8080/api/todos';
+export { TODO_API_URL } from '../config/api.config';
 
 /** Fields supplied when creating a todo; server-generated fields are omitted. */
 export type TodoCreateInput = Pick<Todo, 'title' | 'priority'> &
@@ -160,6 +161,13 @@ export class TodoService {
     this.logCrud('REPLACE_CACHE', { todos });
   }
 
+  clearCache(): void {
+    this._todos.set([]);
+    this._loading.set(false);
+    this._error.set(null);
+    this.logCrud('CLEAR_CACHE', {});
+  }
+
   private upsertTodo(todo: Todo): void {
     this._todos.update((todos) => {
       const index = todos.findIndex((item) => item.id === todo.id);
@@ -217,9 +225,17 @@ export class TodoService {
 
   private handleError<T>(operation: string, error: unknown): Observable<T> {
     this._loading.set(false);
-    this._error.set('Unable to reach the todo API.');
+    this._error.set(this.toErrorMessage(error));
     this.logCrud(`${operation}_ERROR`, error);
     return throwError(() => error);
+  }
+
+  private toErrorMessage(error: unknown): string {
+    if (error instanceof HttpErrorResponse && error.status === 401) {
+      return 'Your session has expired. Please log in again.';
+    }
+
+    return 'Unable to reach the todo API.';
   }
 
   private logCrud(operation: string, payload: unknown): void {
