@@ -44,7 +44,7 @@
 
 .todo-detail__saved {
   margin: 0;
-  border: 1px solid color-mix(in srgb, var(--app-success) 30%, #fff);
+  border: 1px solid color-mix(in srgb, var(--app-success) 38%, var(--app-surface));
   border-radius: 6px;
   padding: 0.65rem 0.75rem;
   background: var(--app-success-surface);
@@ -56,8 +56,8 @@
   display: grid;
   justify-items: start;
   border: 1px dashed var(--app-border);
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 12px 32px rgba(25, 42, 70, 0.05);
+  background: var(--app-card-background);
+  box-shadow: var(--app-soft-shadow);
 }
 
 .todo-detail__missing mat-card-content {

@@ -53,8 +53,8 @@
   display: grid;
   justify-items: start;
   border: 1px dashed var(--app-border);
-  background: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 12px 32px rgba(25, 42, 70, 0.05);
+  background: var(--app-card-background);
+  box-shadow: var(--app-soft-shadow);
 }
 
 .todo-home__empty mat-card-content {

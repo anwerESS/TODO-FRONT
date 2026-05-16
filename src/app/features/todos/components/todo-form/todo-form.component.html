@@ -34,8 +34,29 @@
     <mat-form-field class="todo-form__field" appearance="outline" subscriptSizing="dynamic">
       <mat-label>Priority</mat-label>
       <mat-select id="todo-priority" formControlName="priority">
+        <mat-select-trigger>
+          <span
+            class="priority-pill"
+            [attr.data-priority]="form.controls.priority.value"
+            [class.priority-pill--low]="form.controls.priority.value === TodoPriority.LOW"
+            [class.priority-pill--medium]="form.controls.priority.value === TodoPriority.MEDIUM"
+            [class.priority-pill--high]="form.controls.priority.value === TodoPriority.HIGH"
+          >
+            {{ form.controls.priority.value }}
+          </span>
+        </mat-select-trigger>
         @for (priority of priorities; track priority) {
-          <mat-option [value]="priority">{{ priority }}</mat-option>
+          <mat-option [value]="priority">
+            <span
+              class="priority-pill"
+              [attr.data-priority]="priority"
+              [class.priority-pill--low]="priority === TodoPriority.LOW"
+              [class.priority-pill--medium]="priority === TodoPriority.MEDIUM"
+              [class.priority-pill--high]="priority === TodoPriority.HIGH"
+            >
+              {{ priority }}
+            </span>
+          </mat-option>
         }
       </mat-select>
       @if (hasError('priority', 'required') || hasError('priority', 'invalidPriority')) {

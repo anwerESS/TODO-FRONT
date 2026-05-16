@@ -12,4 +12,12 @@
     </a>
     <a matButton="text" routerLink="/new" routerLinkActive="is-active">New todo</a>
   </nav>
+
+  <mat-slide-toggle
+    class="app-header__theme-toggle"
+    [checked]="theme.isDark()"
+    (change)="theme.setDark($event.checked)"
+  >
+    Dark
+  </mat-slide-toggle>
 </mat-toolbar>

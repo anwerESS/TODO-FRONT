@@ -41,6 +41,7 @@ export class TodoFiltersComponent {
   private readonly formBuilder = inject(FormBuilder);
 
   readonly filtersChange = output<TodoFilters>();
+  readonly TodoPriority = TodoPriority;
   readonly priorities = Object.values(TodoPriority);
 
   readonly form = this.formBuilder.nonNullable.group({

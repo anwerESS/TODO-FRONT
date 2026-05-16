@@ -63,6 +63,7 @@ export class TodoFormComponent {
   readonly submitLabel = input('Save todo');
   readonly submitted = output<TodoCreateInput>();
 
+  readonly TodoPriority = TodoPriority;
   readonly priorities = Object.values(TodoPriority);
 
   readonly form = this.formBuilder.nonNullable.group({

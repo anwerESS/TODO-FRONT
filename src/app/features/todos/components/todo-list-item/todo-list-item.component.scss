@@ -4,8 +4,8 @@
   gap: 1rem;
   align-items: center;
   border: 1px solid var(--app-border);
-  background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 10px 30px rgba(25, 42, 70, 0.06);
+  background: var(--app-card-background);
+  box-shadow: var(--app-soft-shadow);
   transition:
     border-color 160ms ease,
     box-shadow 160ms ease,
@@ -14,12 +14,12 @@
 
 .todo-item:hover {
   border-color: color-mix(in srgb, var(--mat-sys-primary) 34%, var(--app-border));
-  box-shadow: 0 16px 36px rgba(25, 42, 70, 0.1);
+  box-shadow: var(--app-hover-shadow);
   transform: translateY(-1px);
 }
 
 .todo-item--done {
-  background: color-mix(in srgb, var(--app-success-surface) 50%, #fff);
+  background: var(--app-card-done-background);
 }
 
 .todo-item__main {
@@ -81,18 +81,21 @@
 }
 
 .todo-item__priority--low {
-  --mat-chip-elevated-container-color: var(--app-success-surface);
-  --mat-chip-label-text-color: var(--app-success);
+  --mat-chip-elevated-container-color: var(--app-priority-low-surface);
+  --mat-chip-label-text-color: var(--app-priority-low);
+  --mat-chip-outline-color: var(--app-priority-low-border);
 }
 
 .todo-item__priority--medium {
-  --mat-chip-elevated-container-color: var(--app-warning-surface);
-  --mat-chip-label-text-color: var(--app-warning);
+  --mat-chip-elevated-container-color: var(--app-priority-medium-surface);
+  --mat-chip-label-text-color: var(--app-priority-medium);
+  --mat-chip-outline-color: var(--app-priority-medium-border);
 }
 
 .todo-item__priority--high {
-  --mat-chip-elevated-container-color: var(--app-danger-surface);
-  --mat-chip-label-text-color: var(--app-danger);
+  --mat-chip-elevated-container-color: var(--app-priority-high-surface);
+  --mat-chip-label-text-color: var(--app-priority-high);
+  --mat-chip-outline-color: var(--app-priority-high-border);
 }
 
 .todo-item__actions {
