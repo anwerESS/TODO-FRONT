@@ -17,12 +17,9 @@
       <mat-chip-set class="todo-item__meta" aria-label="Todo metadata">
         <mat-chip
           class="todo-item__priority todo-priority-chip"
-          [attr.data-priority]="todo().priority"
-          [class.todo-item__priority--low]="todo().priority === TodoPriority.LOW"
-          [class.todo-item__priority--medium]="todo().priority === TodoPriority.MEDIUM"
-          [class.todo-item__priority--high]="todo().priority === TodoPriority.HIGH"
+          [appTodoPriority]="todo().priority"
         >
-          {{ todo().priority }}
+          {{ todo().priority | todoPriorityLabel }}
         </mat-chip>
 
         @if (todo().category) {
@@ -30,7 +27,7 @@
         }
 
         @if (todo().dueDate) {
-          <mat-chip>Due {{ todo().dueDate | date: 'mediumDate' }}</mat-chip>
+          <mat-chip>{{ todo().dueDate | todoDueLabel }}</mat-chip>
         }
       </mat-chip-set>
     </div>

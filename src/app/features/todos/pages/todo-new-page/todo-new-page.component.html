@@ -8,5 +8,5 @@
     <p class="todo-new__error">{{ error() }}</p>
   }
 
-  <app-todo-form submitLabel="Create todo" (submitted)="createTodo($event)" />
+  <app-todo-form [autoFocus]="true" submitLabel="Create todo" (submitted)="createTodo($event)" />
 </section>

@@ -16,16 +16,13 @@
     <mat-select id="todo-priority-filter" formControlName="priority">
       <mat-select-trigger>
         @if (form.controls.priority.value === 'ALL') {
-          All priorities
+          {{ form.controls.priority.value | todoPriorityLabel }}
         } @else {
           <span
             class="priority-pill"
-            [attr.data-priority]="form.controls.priority.value"
-            [class.priority-pill--low]="form.controls.priority.value === TodoPriority.LOW"
-            [class.priority-pill--medium]="form.controls.priority.value === TodoPriority.MEDIUM"
-            [class.priority-pill--high]="form.controls.priority.value === TodoPriority.HIGH"
+            [appTodoPriority]="form.controls.priority.value"
           >
-            {{ form.controls.priority.value }}
+            {{ form.controls.priority.value | todoPriorityLabel }}
           </span>
         }
       </mat-select-trigger>
@@ -34,12 +31,9 @@
         <mat-option [value]="priority">
           <span
             class="priority-pill"
-            [attr.data-priority]="priority"
-            [class.priority-pill--low]="priority === TodoPriority.LOW"
-            [class.priority-pill--medium]="priority === TodoPriority.MEDIUM"
-            [class.priority-pill--high]="priority === TodoPriority.HIGH"
+            [appTodoPriority]="priority"
           >
-            {{ priority }}
+            {{ priority | todoPriorityLabel }}
           </span>
         </mat-option>
       }

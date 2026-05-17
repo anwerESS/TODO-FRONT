@@ -8,6 +8,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 
 import { TodoPriority } from '../../../../core/models/todo-priority.enum';
+import { TodoPriorityDirective } from '../../../../shared/directives/todo-priority.directive';
+import { TodoPriorityLabelPipe } from '../../../../shared/pipes/todo-priority-label.pipe';
 
 export type TodoCompletionFilter = 'all' | 'active' | 'completed';
 export type TodoPriorityFilter = TodoPriority | 'ALL';
@@ -33,6 +35,8 @@ export const DEFAULT_TODO_FILTERS: TodoFilters = {
     MatInputModule,
     MatSelectModule,
     ReactiveFormsModule,
+    TodoPriorityDirective,
+    TodoPriorityLabelPipe,
   ],
   templateUrl: './todo-filters.component.html',
   styleUrl: './todo-filters.component.scss',
@@ -41,7 +45,6 @@ export class TodoFiltersComponent {
   private readonly formBuilder = inject(FormBuilder);
 
   readonly filtersChange = output<TodoFilters>();
-  readonly TodoPriority = TodoPriority;
   readonly priorities = Object.values(TodoPriority);
 
   readonly form = this.formBuilder.nonNullable.group({

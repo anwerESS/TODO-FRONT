@@ -16,6 +16,9 @@ import { MatSelectModule } from '@angular/material/select';
 import { TodoPriority } from '../../../../core/models/todo-priority.enum';
 import { Todo } from '../../../../core/models/todo.model';
 import { TodoCreateInput } from '../../../../core/services/todo.service';
+import { AutofocusDirective } from '../../../../shared/directives/autofocus.directive';
+import { TodoPriorityDirective } from '../../../../shared/directives/todo-priority.directive';
+import { TodoPriorityLabelPipe } from '../../../../shared/pipes/todo-priority-label.pipe';
 
 const nonBlank: ValidatorFn = (control: AbstractControl<string | null>): ValidationErrors | null => {
   const value = control.value;
@@ -46,12 +49,15 @@ const priorityValue: ValidatorFn = (
 @Component({
   selector: 'app-todo-form',
   imports: [
+    AutofocusDirective,
     MatButtonModule,
     MatCheckboxModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
     ReactiveFormsModule,
+    TodoPriorityDirective,
+    TodoPriorityLabelPipe,
   ],
   templateUrl: './todo-form.component.html',
   styleUrl: './todo-form.component.scss',
@@ -60,10 +66,10 @@ export class TodoFormComponent {
   private readonly formBuilder = inject(FormBuilder);
 
   readonly todo = input<Todo | null>(null);
+  readonly autoFocus = input(false);
   readonly submitLabel = input('Save todo');
   readonly submitted = output<TodoCreateInput>();
 
-  readonly TodoPriority = TodoPriority;
   readonly priorities = Object.values(TodoPriority);
 
   readonly form = this.formBuilder.nonNullable.group({
